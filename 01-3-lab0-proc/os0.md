@@ -96,4 +96,17 @@
 `ivec(void *isr)`函数用来设置中断处理的函数地址。
 
 ###CPU执行RTI指令的具体完成工作是哪些？
+```
+case RTI:
+  if (user) { trap = FPRIV; break; }
+  xsp -= tsp; tsp = fsp = 0;
+  if (!(p = tr[xsp >> 12]) && !(p = rlook(xsp))) { dprintf(2,"RTI kstack fault\n"); goto fatal; }
+  t = *(uint *)((xsp ^ p) & -8); xsp += 8;
+  if (!(p = tr[xsp >> 12]) && !(p = rlook(xsp))) { dprintf(2,"RTI kstack fault\n"); goto fatal; }
+  xcycle += (pc = *(uint *)((xsp ^ p) & -8) + tpc) - (uint)xpc; xsp += 8;
+  xpc = (int *)pc;
+  if (t & USER) { ssp = xsp; xsp = usp; user = 1; tr = tru; tw = twu; }
+  if (!iena) { if (ipend) { trap = ipend & -ipend; ipend ^= trap; goto interrupt; } iena = 1; }
+  goto fixpc; // page may be invalid
 
+```
