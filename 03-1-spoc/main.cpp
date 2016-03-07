@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <cstdio>
 #include "mem.h"
 
 std::map<std::string, void*> mems;
@@ -25,6 +26,7 @@ int main() {
                 free_local(mems[name]);
                 mems.erase(name);
             }
-        }
+        } else
+            std::cout << "Op not found!\n";
     }
 }
